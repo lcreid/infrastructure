@@ -66,19 +66,28 @@ They all need:
 
 I did some work with Kamal 1 to deploy Rails apps and the static site. I also did work to containerize the LimeSurvey app.
 
+The Rails apps also need a lot of clean-up and updating. For example:
+
+* The asset pipeline is Sprockets.
+* Gems are pinned to really old versions.
+* Bootstrap V4.
+
 ### Rails Apps
 
 - [ ] `acedashboards.com`.
+  - [ ] Rails 8.
   - [ ] `Dockerfile`.
   - [ ] `config/deploy.yml`.
   - [ ] `.kamal/secrets`.
   - [ ] `up` page.
 - [ ] `outages.weenhanceit.com`
+  - [ ] Rails 8.
   - [ ] `Dockerfile`.
   - [ ] `config/deploy.yml`.
   - [ ] `.kamal/secrets`.
   - [ ] `up` page.
 - [ ] `plazachapina.ca`
+  - [ ] Rails 8.
   - [ ] `Dockerfile`.
   - [ ] `config/deploy.yml`.
   - [ ] `.kamal/secrets`.
