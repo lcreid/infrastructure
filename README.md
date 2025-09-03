@@ -40,6 +40,11 @@ Swap:             0B          0B          0B
 1. Log out and back in. Or `newgrp docker`.
 1. `docker run hello-world`.
 
+## Create a Deploy User
+1. Create a user `deploy` on the server.
+2. Add it to the `docker` group.
+3. Give it `authorized_keys` for the people who are going to deploy.
+
 ## Install Kamal on Laptop
 
 [Notes from original install:]
@@ -59,10 +64,11 @@ I have three Rails apps, one static site, and one PHP app (LimeSurvey).
 They all need:
 
 * `Dockerfile`. This has to be for a recent version of Ruby, in the case of Rails apps. And Rails 8, because that's what's the latest.
-* `config/deploy.yml`. Deploy a recent version of Postgres if a database is needed.
+* `config/deploy.yml`. Deploy a recent version of Postgres if a database is needed. See below. 
 * `.kamal/secrets` and maybe other secrets stuff (e.g. `.env`). Secrets include the image registry API key.
 * A registry to store the image.
 * A heartbeat/up page.
+* The non-static sites also need their data copied over. I think this was going to be a bit challenge, or at least it looked like it when I was trying to make a containerized version of LimeSurvey.
 
 I did some work with Kamal 1 to deploy Rails apps and the static site. I also did work to containerize the LimeSurvey app.
 
@@ -72,26 +78,51 @@ The Rails apps also need a lot of clean-up and updating. For example:
 * Gems are pinned to really old versions.
 * Bootstrap V4.
 
+### `deploy.yml`
+
+* The database host that the app uses (e.g. `database.yml`) must be the `<service-name>-<accessory-name>`.
+* Use `user: deploy`.
+* Put the database in a directory:
+  ```
+  directories:
+    - postgres:/var/lib/postgresql/data
+  ```
+
+### Copying Data
+
+1. Turn off the front end on the old platform.
+2. Copy _each_ database with `pg_dump`, not `pg_dumpall`. This won't copy the users.
+3. Copy the dumps to somewhere accessible.
+4. Deploy the app via Kamal. This should create the database and user.
+5. Set the app to maintenance mode as quickly as possible???
+6. Load the data. Can I just use `exec` on the accessory and upload the file from the laptop? Do I have to copy the file up to the server? I won't have `psql` on the server itself. So whatever I do will have to be either in the accessory or the app.
+
 ### Rails Apps
 
 - [ ] `acedashboards.com`.
-  - [ ] Rails 8.
-  - [ ] `Dockerfile`.
-  - [ ] `config/deploy.yml`.
-  - [ ] `.kamal/secrets`.
-  - [ ] `up` page.
+  - [x] Rails 8.
+  - [x] `Dockerfile`.
+  - [x] `config/deploy.yml`.
+  - [x] `.kamal/secrets`.
+  - [x] `up` page.
+    - [x] Route.
+    - [x] Controller.
 - [ ] `outages.weenhanceit.com`
-  - [ ] Rails 8.
-  - [ ] `Dockerfile`.
-  - [ ] `config/deploy.yml`.
-  - [ ] `.kamal/secrets`.
-  - [ ] `up` page.
+  - [x] Rails 8.
+  - [x] `Dockerfile`.
+  - [x] `config/deploy.yml`.
+  - [x] `.kamal/secrets`.
+  - [x] `up` page.
+    - [x] Route.
+    - [x] Controller.
 - [ ] `plazachapina.ca`
-  - [ ] Rails 8.
+  - [x] Rails 8.
   - [ ] `Dockerfile`.
   - [ ] `config/deploy.yml`.
   - [ ] `.kamal/secrets`.
   - [ ] `up` page.
+    - [ ] Route.
+    - [ ] Controller.
 
 ### Static Site
 
