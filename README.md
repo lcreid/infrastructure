@@ -45,6 +45,15 @@ Swap:             0B          0B          0B
 2. Add it to the `docker` group.
 3. Give it `authorized_keys` for the people who are going to deploy.
 
+```
+sudo adduser --gecos "" deploy
+sudo adduser deploy docker
+sudo mkdir -m 700 ~deploy/.ssh
+curl https://github.com/lcreid.keys | sudo tee -a ~deploy/.ssh/authorized_keys
+sudo chmod 600 ~deploy/.ssh/authorized_keys
+sudo chown -r deploy:deploy ~deploy/.ssh
+```
+
 ## Install Kamal on Laptop
 
 [Notes from original install:]
@@ -92,10 +101,10 @@ The Rails apps also need a lot of clean-up and updating. For example:
 
 1. Turn off the front end on the old platform.
 2. Copy _each_ database with `pg_dump`, not `pg_dumpall`. This won't copy the users.
-3. Copy the dumps to somewhere accessible.
 4. Deploy the app via Kamal. This should create the database and user.
 5. Set the app to maintenance mode as quickly as possible???
-6. Load the data. Can I just use `exec` on the accessory and upload the file from the laptop? Do I have to copy the file up to the server? I won't have `psql` on the server itself. So whatever I do will have to be either in the accessory or the app.
+3. Copy the dumps to somewhere accessible. Since I'm using a directory on the server for each app, I should be able to copy the dump to `kamal-a` after bringing the apps up once. The data will be accessible to the Postgres container.
+6. Load the data. Can I just use `exec` on the accessory and upload the file from the laptop? I won't have `psql` on the server itself. So whatever I do will have to be either in the accessory or the app. The Docker Hub page for Postgres says you can run `psql` in the container with: `docker run -it --rm --network some-network postgres psql -h some-postgres -U postgres`.
 
 ### Rails Apps
 
@@ -124,9 +133,24 @@ The Rails apps also need a lot of clean-up and updating. For example:
     - [ ] Route.
     - [ ] Controller.
 
+Migration:
+
+1. Shut down services.
+2. Copy databases. (Practice this first.)
+3. Point router at `kamal-a`.
+4. Deploy `acedashboards.com`.
+5. `kamal app maintenance`.
+6. Rsync database copy to database directory. Something like `~deploy/acedashboards/postgres`. From `postgres-a`: `rsync dump.sql deploy@kamal-a:postgres`
+7. `kamal accessory exec db psql -U postgres -f postgres/dump.sql` ???
+8. `kamal app live`.
+
 ### Static Site
 
 The static site is an off-the-shelf nginx image with the site added to its `html` directory.
+
+### Backups
+
+I really only need backups now of the databases. If something goes bad on the server, I just deploy the server. If we had uploads, I'd have to back them up too, but that's not the case so far. Previously I backed up the VM, and the database VM. There is a Postgres image to do backups. It might put them on S3. It runs as another accessory.
 
 ## Configuring
 
