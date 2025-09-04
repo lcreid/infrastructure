@@ -86,6 +86,8 @@ The Rails apps also need a lot of clean-up and updating. For example:
 * The asset pipeline is Sprockets.
 * Gems are pinned to really old versions.
 * Bootstrap V4.
+* Use port 80 in both `Dockerfile` and `config/deploy.yml` (default in the latter).
+* Remove Capistrano.
 
 ### `deploy.yml`
 
@@ -108,9 +110,10 @@ The Rails apps also need a lot of clean-up and updating. For example:
 
 ### Rails Apps
 
-- [ ] `acedashboards.com`.
+- [x] `acedashboards.com`.
   - [x] Rails 8.
   - [x] `Dockerfile`.
+  - [x] `.dockerignore` -- minimize size of image and don't leak secrets.
   - [x] `config/deploy.yml`.
   - [x] `.kamal/secrets`.
   - [x] `up` page.
@@ -118,7 +121,8 @@ The Rails apps also need a lot of clean-up and updating. For example:
     - [x] Controller.
 - [ ] `outages.weenhanceit.com`
   - [x] Rails 8.
-  - [x] `Dockerfile`.
+  - [x] `Dockerfile`. -- I think Outages might have the best/most like stock Rails 8 `Dockerfile`. Better than poppies or dashboards.
+  - [x] `.dockerignore` -- minimize size of image and don't leak secrets.
   - [x] `config/deploy.yml`.
   - [x] `.kamal/secrets`.
   - [x] `up` page.
@@ -127,6 +131,7 @@ The Rails apps also need a lot of clean-up and updating. For example:
 - [ ] `plazachapina.ca`
   - [x] Rails 8.
   - [ ] `Dockerfile`.
+  - [ ] `.dockerignore` -- minimize size of image and don't leak secrets.
   - [ ] `config/deploy.yml`.
   - [ ] `.kamal/secrets`.
   - [ ] `up` page.
@@ -136,17 +141,24 @@ The Rails apps also need a lot of clean-up and updating. For example:
 Migration:
 
 1. Shut down services.
-2. Copy databases. (Practice this first.)
+2. Copy databases. (Practice this first.) On `postgres-a`: `sudo -u postgres pg_dump -d chapina --clean --if-exists >chapina.sql`.
 3. Point router at `kamal-a`.
-4. Deploy `acedashboards.com`.
-5. `kamal app maintenance`.
-6. Rsync database copy to database directory. Something like `~deploy/acedashboards/postgres`. From `postgres-a`: `rsync dump.sql deploy@kamal-a:postgres`
-7. `kamal accessory exec db psql -U postgres -f postgres/dump.sql` ???
-8. `kamal app live`.
+  * Reserve IP.
+  * Forward HTTP and HTTPS to the IP -- _Don't forget to apply/save!_
+5. `dotenv kamal setup` once to set up the proxy and accessories.
+6. Deploy `acedashboards.com`.
+7. `kamal app maintenance`.
+8. Rsync database copy to database directory. Something like `~deploy/acedashboards/postgres`. On `postgres-a`: `rsync dashboard_prod.sql kamal-a:`
+9. `sudo mv outages_prod.sql /home/deploy/outages-db/postgres`.
+10. `sudo chown 70:70 /home/deploy/outages-db/postgres/outages_prod.sql`.
+10. Log in to the accessory `dotenv kamal accessory exec -i db /bin/bash`, and type: `psql -U acedashboards -d dashboard_prod -f /var/lib/postgresql/data/dashboard_prod.sql -h acedashboards-db`. `psql -U outages -h outages-db -d outages_prod -f /var/lib/postgresql/data/outages_prod.sql`.
+10. `kamal app live`.
 
 ### Static Site
 
 The static site is an off-the-shelf nginx image with the site added to its `html` directory.
+
+Holy crap! This was super-easy. But I can't deploy from the repo, because I deploy `_site`. So: `context: .`.
 
 ### Backups
 
