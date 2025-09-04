@@ -130,13 +130,14 @@ The Rails apps also need a lot of clean-up and updating. For example:
     - [x] Controller.
 - [ ] `plazachapina.ca`
   - [x] Rails 8.
-  - [ ] `Dockerfile`.
-  - [ ] `.dockerignore` -- minimize size of image and don't leak secrets.
-  - [ ] `config/deploy.yml`.
-  - [ ] `.kamal/secrets`.
-  - [ ] `up` page.
-    - [ ] Route.
-    - [ ] Controller.
+  - [x] `Dockerfile`.
+  - [x] `.dockerignore` -- minimize size of image and don't leak secrets.
+  - [x] `config/deploy.yml`.
+  - [x] `.kamal/secrets`.
+  - [x] `bin/docker-entrypoint`.
+  - [x] `up` page.
+    - [x] Route.
+    - [x] Controller.
 
 Migration:
 
