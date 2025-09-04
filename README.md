@@ -1,6 +1,6 @@
 # Infrastructure
 
-Memory before creating a VM for Docker (`free -h`):
+Memory on `hunapu` before creating a VM for Docker (`free -h`):
 
 ```
               total        used        free      shared  buff/cache   available
@@ -8,20 +8,16 @@ Mem:          7.6Gi       3.3Gi       1.4Gi       2.0Mi       2.9Gi       4.0Gi
 Swap:            0B          0B          0B
 ```
 
-Memory after creating another VM with 2 GB RAM:
+Memory after creating another VM with 3 GB RAM:
 
 ```
-              total        used        free      shared  buff/cache   available
-Mem:          7.6Gi       4.7Gi       606Mi       2.0Mi       2.4Gi       2.7Gi
-Swap:            0B          0B          0B
+               total        used        free      shared  buff/cache   available
+Mem:           7.6Gi       6.9Gi       162Mi       1.9Mi       830Mi       711Mi
+Swap:             0B          0B          0B
 ```
 
 Memory after create another VM with 3 GB RAM. Also, the host is now 24.04.1:
 
-```
-               total        used        free      shared  buff/cache   available
-Mem:           7.6Gi       6.4Gi       482Mi       1.9Mi       1.0Gi       1.2Gi
-Swap:             0B          0B          0B
 ```
 
 Memory on `a-22-04` with three Rails apps running (`free -h`):
@@ -30,6 +26,14 @@ Memory on `a-22-04` with three Rails apps running (`free -h`):
                total        used        free      shared  buff/cache   available
 Mem:           1.9Gi       527Mi        94Mi       7.0Mi       1.3Gi       1.2Gi
 Swap:          1.8Gi       4.0Mi       1.8Gi
+```
+
+Memory on `postgres-a`:
+
+```
+              total        used        free      shared  buff/cache   available
+Mem:          964Mi       185Mi       110Mi        57Mi       668Mi       550Mi
+Swap:         1.9Gi        41Mi       1.9Gi
 ```
 
 Memory on `kamal-a` with three Rails apps running:
@@ -42,7 +46,7 @@ Swap:          2.8Gi       268Ki       2.8Gi
 
 ## Create a VM
 
-1. Created a  VMfrom 24.04.3. Set macvtap device to: `enp0s31f6`. This appears to be a magic number I got from somewhere and use forever.
+1. Created a  VM from 24.04.3. Set macvtap device to: `enp0s31f6`. This appears to be a magic number I got from somewhere and use forever.
 2. I asked for 3 GB of RAM.
 3. I asked for 25 GB of disk. When creating the disk, _don't_ use the default LVM. It just wastes half the space. 
 1. _DON'T_ install Docker as part of the installation. It will use Snap, which will lead you to no end of grief. Don't _ever_ install anything with Snap!
@@ -57,6 +61,7 @@ Swap:          2.8Gi       268Ki       2.8Gi
 1. `docker run hello-world`.
 
 ## Create a Deploy User
+
 1. Create a user `deploy` on the server.
 2. Add it to the `docker` group.
 3. Give it `authorized_keys` for the people who are going to deploy.
@@ -181,7 +186,9 @@ Holy crap! This was super-easy. But I can't deploy from the repo, because I depl
 
 I really only need backups now of the databases. If something goes bad on the server, I just deploy the server. If we had uploads, I'd have to back them up too, but that's not the case so far. Previously I backed up the VM, and the database VM. There is a Postgres image to do backups. It might put them on S3. It runs as another accessory.
 
-Exclude the whole server from backups, since I can just re-create it? Yes. That's what I did.
+Exclude the whole server from the host backups, as I did with the other VMs, since it was backing itself up? Yes. That's what I did.
+
+Backing up `kamal-a`. That's a lot being backed up that doesn't need to be backed up, but I can tune this, I guess. I really only need to back up the `~deploy` directory, as that's where the database data is.
 
 ## Configuring
 
