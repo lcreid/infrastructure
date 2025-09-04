@@ -24,6 +24,22 @@ Mem:           7.6Gi       6.4Gi       482Mi       1.9Mi       1.0Gi       1.2Gi
 Swap:             0B          0B          0B
 ```
 
+Memory on `a-22-04` with three Rails apps running (`free -h`):
+
+```
+               total        used        free      shared  buff/cache   available
+Mem:           1.9Gi       527Mi        94Mi       7.0Mi       1.3Gi       1.2Gi
+Swap:          1.8Gi       4.0Mi       1.8Gi
+```
+
+Memory on `kamal-a` with three Rails apps running:
+
+```
+               total        used        free      shared  buff/cache   available
+Mem:           2.8Gi       1.0Gi       276Mi        76Mi       1.9Gi       1.8Gi
+Swap:          2.8Gi       268Ki       2.8Gi
+```
+
 ## Create a VM
 
 1. Created a  VMfrom 24.04.3. Set macvtap device to: `enp0s31f6`. This appears to be a magic number I got from somewhere and use forever.
@@ -164,6 +180,8 @@ Holy crap! This was super-easy. But I can't deploy from the repo, because I depl
 ### Backups
 
 I really only need backups now of the databases. If something goes bad on the server, I just deploy the server. If we had uploads, I'd have to back them up too, but that's not the case so far. Previously I backed up the VM, and the database VM. There is a Postgres image to do backups. It might put them on S3. It runs as another accessory.
+
+Exclude the whole server from backups, since I can just re-create it? Yes. That's what I did.
 
 ## Configuring
 
