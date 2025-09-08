@@ -149,7 +149,7 @@ The Rails apps also need a lot of clean-up and updating. For example:
   - [x] `up` page.
     - [x] Route.
     - [x] Controller.
-- [ ] `plazachapina.ca`
+- [x] `plazachapina.ca`
   - [x] Rails 8.
   - [x] `Dockerfile`.
   - [x] `.dockerignore` -- minimize size of image and don't leak secrets.
@@ -171,7 +171,7 @@ Migration:
 6. Deploy `acedashboards.com`.
 7. `kamal app maintenance`.
 8. Rsync database copy to database directory. Something like `~deploy/acedashboards/postgres`. On `postgres-a`: `rsync dashboard_prod.sql kamal-a:`
-9. `sudo mv outages_prod.sql /home/deploy/outages-db/postgres`.
+9. On `kamal-a`: `sudo mv outages_prod.sql /home/deploy/outages-db/postgres`.
 10. `sudo chown 70:70 /home/deploy/outages-db/postgres/outages_prod.sql`.
 10. Log in to the accessory `dotenv kamal accessory exec -i db /bin/bash`, and type: `psql -U acedashboards -d dashboard_prod -f /var/lib/postgresql/data/dashboard_prod.sql -h acedashboards-db`. `psql -U outages -h outages-db -d outages_prod -f /var/lib/postgresql/data/outages_prod.sql`.
 10. `kamal app live`.
@@ -182,9 +182,51 @@ The static site is an off-the-shelf nginx image with the site added to its `html
 
 Holy crap! This was super-easy. But I can't deploy from the repo, because I deploy `_site`. So: `context: .`.
 
+### LimeSurvey/PHP App
+
+I found [this](https://github.com/martialblog/docker-limesurvey).
+
+- [ ] `limesurvey.verapax.org`
+  - [x] `kamal init`.
+  - [x] `Dockerfile`. Took the `Dockerfile` from the above link. Version 6.0 apache. 
+  - [ ] `.dockerignore` -- minimize size of image and don't leak secrets.
+  - [x] `config/deploy.yml`.
+  - [x] `.kamal/secrets`.
+  - [x] `bin/docker-entrypoint`. Not in bin, but is part of the `Dockerfile`.
+  - [x] Doh! Still need `up` page. Just configure it to hit the home page, even though that triggers a bunch of activity.
+
+When creating the database, or really the whole image, I have to force it _not_ to use a prefix. The original database didn't use a prefix so the restore isn't going to work.
+
+Oh, this makes me think I had this problem before: Forcing TLS/SSL is set in the LimeSurvey database. So when you load the database dump in a local docker compose environment, you get grief because you don't have a certificate. And now that it's up, also grief because the database doesn't 
+
+```
+$ docker compose exec -i limesurvey-db /bin/bash
+root@7dbc06aaa178:/# psql -U limesurvey
+psql (17.6 (Debian 17.6-1.pgdg13+1))
+Type "help" for help.
+
+limesurvey=# select * from settings_global where stg_name like '%ssl%';
+   stg_name   | stg_value 
+--------------+-----------
+ force_ssl    | on
+ emailsmtpssl | ssl
+(2 rows)
+
+limesurvey=# update settings_global set stg_value = 'off' where stg_name = 'force_ssl';
+UPDATE 1
+limesurvey=# select * from settings_global where stg_name like '%ssl%';
+   stg_name   | stg_value 
+--------------+-----------
+ emailsmtpssl | ssl
+ force_ssl    | off
+(2 rows)
+```
+
+Limesurvey needs e-mail for password resets, etc. (Probably other apps do, too.) Needed to get an app password from Gmail.
+
 ### Backups
 
-I really only need backups now of the databases. If something goes bad on the server, I just deploy the server. If we had uploads, I'd have to back them up too, but that's not the case so far. Previously I backed up the VM, and the database VM. There is a Postgres image to do backups. It might put them on S3. It runs as another accessory.
+I really only need backups now of the databases. If something goes bad on the server, I just deploy the server. If we had uploads, I'd have to back them up too, but that's not the case so far (will be for LimeSurvey). Previously I backed up the VM, and the database VM. There is a Postgres image to do backups. It might put them on S3. It runs as another accessory.
 
 Exclude the whole server from the host backups, as I did with the other VMs, since it was backing itself up? Yes. That's what I did.
 
