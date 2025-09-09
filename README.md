@@ -16,10 +16,6 @@ Mem:           7.6Gi       6.9Gi       162Mi       1.9Mi       830Mi       711Mi
 Swap:             0B          0B          0B
 ```
 
-Memory after create another VM with 3 GB RAM. Also, the host is now 24.04.1:
-
-```
-
 Memory on `a-22-04` with three Rails apps running (`free -h`):
 
 ```
@@ -36,12 +32,12 @@ Mem:          964Mi       185Mi       110Mi        57Mi       668Mi       550Mi
 Swap:         1.9Gi        41Mi       1.9Gi
 ```
 
-Memory on `kamal-a` with three Rails apps running:
+Memory on `kamal-a` with three Rails apps and LimeSurvey (with Apache) running:
 
 ```
                total        used        free      shared  buff/cache   available
-Mem:           2.8Gi       1.0Gi       276Mi        76Mi       1.9Gi       1.8Gi
-Swap:          2.8Gi       268Ki       2.8Gi
+Mem:           2.8Gi       1.0Gi       277Mi        72Mi       1.9Gi       1.8Gi
+Swap:          2.8Gi       185Mi       2.7Gi
 ```
 
 ## Create a VM
