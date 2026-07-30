@@ -46,6 +46,7 @@ Swap:          2.8Gi       185Mi       2.7Gi
 2. I asked for 3 GB of RAM.
 3. I asked for 25 GB of disk. When creating the disk, _don't_ use the default LVM. It just wastes half the space. 
 1. _DON'T_ install Docker as part of the installation. It will use Snap, which will lead you to no end of grief. Don't _ever_ install anything with Snap!
+2. DNS won't work until you `sudo ln -sf /run/systemd/resolve/resolv.conf /etc/resolv.conf`.
 
 ## Install Docker
 
